@@ -28,7 +28,7 @@ class SmartEDA:
     """
 
     def __init__(self,
-        df: pd.DataFrame,
+        df: pd.DataFrame = None,
         copy_data: bool = True,
         visualize_numeric: bool = False,
         visualize_object: bool = False,
@@ -39,33 +39,11 @@ class SmartEDA:
         show_info: bool = False,
         dataset_name: str = "dataset"):
         
-        """
-        Parameters
-        ----------
-        df : pd.DataFrame
-            Input dataset.
-        copy_data : bool, default=True
-            Whether to work on a copy of the dataframe.
-        visualize_numeric : bool, default=False
-            Plot numeric feature distributions.
-        visualize_object : bool, default=False
-            Plot categorical feature distributions.
-        save_png : bool, default=False
-            Save generated plots as PNG files.
-        show_info : bool, default=False
-            Display dataframe info and missing value summary.
-        dataset_name : str, default='dataset'
-            Create another directory for saving images
-        """
-        
         # - - - Using modern plot style - - - #
         plt.style.use('seaborn-v0_8') 
-        
-        if not isinstance(df, pd.DataFrame):
-            raise TypeError("df must be a pandas DataFrame")
-        if df.empty:
-            raise ValueError("df must not be empty")
+    
 
+        self.df = df
         self.visnum = visualize_numeric
         self.visobj = visualize_object
         self.vishm = visualize_heatmap
@@ -73,11 +51,7 @@ class SmartEDA:
         self.save_png_num = save_png_numeric
         self.save_png_hm = save_png_heatmap
         self.show_info = show_info
-    
-        self.df = df.copy(deep=True) if copy_data else df
-        
-        self.numeric_cols = self.df.select_dtypes(include=np.number).columns.tolist()
-        self.object_cols = self.df.select_dtypes(include=["object", "category", "str"]).columns.tolist()
+        self.copy_data = copy_data
 
         self.dataset_name = dataset_name
         self.output_dir = os.path.join("eda_outputs", self.dataset_name)
@@ -92,17 +66,33 @@ class SmartEDA:
             os.makedirs(self.object_dir, exist_ok=True)
         if self.save_png_hm:
             os.makedirs(self.heatmap_dir, exist_ok=True)
-        self.render_plots()
+
+        try:
+            if isinstance(df, pd.DataFrame):
+                if df.empty:
+                    raise ValueError("Data Frame must not be empty")
+                else:
+                    self.df = df.copy(deep=True) if self.copy_data else self.df
+                    self.numeric_cols = self.df.select_dtypes(include=np.number).columns.tolist()
+                    self.object_cols = self.df.select_dtypes(include=["object", "category", "str"]).columns.tolist()
+                    self.render_plots()
+            else:
+                raise TypeError("DataFrame is not a Pandas DataFrame")
+        except Exception as e:
+            print(f"Error: {e}")
+            raise e
+        
+        self.df = self.df.copy(deep=True) if self.copy_data else self.df
 
     def render_plots(self):
-            if self.visnum or self.save_png_num:
-                self.vis_numeric()
+        if self.visnum or self.save_png_num:
+            self.create_numeric()
 
-            if self.visobj or self.save_png_obj:
-                self.vis_obj()
+        if self.visobj or self.save_png_obj:
+            self.create_object()
             
-            if self.vishm or self.save_png_hm:
-                self.create_heatmap()
+        if self.vishm or self.save_png_hm:
+            self.create_heatmap()
 
     def show_df_info(self):
         # Giving information to user using terminal as interface
@@ -116,8 +106,13 @@ class SmartEDA:
         print('\nColumn types:')
         print(f'Numeric columns: {", ".join(self.numeric_cols)}')
         print(f'Object columns: {", ".join(self.object_cols)}')
-    
-    def vis_numeric(self):
+
+    @staticmethod
+    def visualize_numeric(df, visualize=True, save_png=False):
+        SmartEDA(df=df, visualize_numeric=visualize, save_png_numeric=save_png)
+
+    def _create_numeric_vis(self):
+        self.numeric_cols = self.df.select_dtypes(include=np.number).columns.tolist()
         for column in self.numeric_cols:
             plt.figure(figsize=(10, 4))
 
@@ -142,8 +137,19 @@ class SmartEDA:
                 plt.show()
             else:
                 plt.close()
+    
+    def create_numeric(self):
+        self._create_numeric_vis()
+
+    @staticmethod
+    def visualize_object(df, visualize=True, save_png=False):
+        SmartEDA(df=df, visualize_object=visualize, save_png_object=save_png)
         
-    def vis_obj(self):
+    def create_object(self):
+        self._create_object_vis()
+
+    def _create_object_vis(self):
+        self.object_cols = self.df.select_dtypes(include=["object", "category", "str"]).columns.tolist()
         for column in self.object_cols:
             count = self.df[column].astype(str).str.strip().value_counts().head(10)
             ax = count.plot(kind='bar', figsize=(12, 6))
@@ -159,6 +165,9 @@ class SmartEDA:
                 plt.close()
     
     def create_heatmap(self):
+        self._create_heatmap_vis()
+
+    def _create_heatmap_vis(self):
         if not self.numeric_cols:
             return "There is no numeric columns in the dataset."
         correlation = self.df[self.numeric_cols].corr()
@@ -166,3 +175,8 @@ class SmartEDA:
         if self.save_png_hm:
             plt.savefig(os.path.join(self.heatmap_dir, "heatmap.png"))
         plt.show()
+    
+    @staticmethod
+    def visualize_heatmap(df, visualize=True, save_png=False,):
+        SmartEDA(df=df, visualize_heatmap=visualize, save_png_heatmap=save_png)
+
