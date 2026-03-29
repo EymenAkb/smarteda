@@ -5,14 +5,18 @@ This repository was developed by **Eymen Akbulut** as part of automating EDA cod
 ## Description
 
 This program is an OOP (Object oriented programming) library code compact coding for EDA analysis.
-This program is mostly on visualizing and other data analysis coding.
+This program is mostly on visualizing and summarizing data.
 
-Attributes are given below:
+Some static methods are given below:
 
--
--
--
--
+- `show_df_info` : Used for giving information, missing values and categories of columns as numeric or object columns.
+- `visualize_numeric` : Used for saving png or directly visualizing numeric columns as histograms.
+- `visualize_object` : Used for saving png or directly visualizing object columns as bar plots.
+- `visualize_heatmap` : Showing correlation between numeric columns.
+
+#### Note
+*If you set `visualize=True` the library will iterate over each column.*
+*If you don't want to see each of them one by one then you can set `visualize=False` and `save_png=True`*
 
 ## Required libraries
 
@@ -38,3 +42,5 @@ docstring might be helpful throughout these processes.
 
 Honestly i want to write something warm in between a serious description.
 I hope this is useful library for your needings. 
+*This library doesn't summarize the code as pdf only for intuition.*
+*This is only a prototype so it can only work for numeric and categorical features.*

@@ -7,22 +7,28 @@ import os
 class SmartEDA:
     """
     SmartEDA provides automated exploratory data analysis (EDA)
-    including data cleaning and visualization for pandas DataFrames.
+    including data intuiton and visualization for pandas DataFrames.
 
     Parameters
     ----------
     df : pd.DataFrame
         Input dataset.
+    
     copy_data : bool, default=True
         Wheter using the dataframe or copying it.
+    
     visualize_numeric : bool, default=False
         Whether to display numeric feature distributions.
+    
     visualize_object : bool, default=False
         Whether to display categorical feature distributions.
+    
     save_png : bool, default=False
         Save plots as PNG files.
+    
     show_info : bool, default=False
         Give basic information about dataset.
+    
     dataset_name : str, default='dataset'
         Create another directory for saving images
     """
@@ -85,6 +91,8 @@ class SmartEDA:
         self.df = self.df.copy(deep=True) if self.copy_data else self.df
 
     def render_plots(self):
+        if self.show_df_info:
+            self.info_show()
         if self.visnum or self.save_png_num:
             self.create_numeric()
 
@@ -93,10 +101,15 @@ class SmartEDA:
             
         if self.vishm or self.save_png_hm:
             self.create_heatmap()
+    
+    @staticmethod
+    def show_df_info(df):
+        SmartEDA(df=df)._create_df_info_report()
 
-    def show_df_info(self):
-        # Giving information to user using terminal as interface
-
+    def info_show(self):
+        self._create_df_info_report
+    
+    def _create_df_info_report(self):
         print("\n=== DataFrame Info ===")
         self.df.info()
     
@@ -108,8 +121,11 @@ class SmartEDA:
         print(f'Object columns: {", ".join(self.object_cols)}')
 
     @staticmethod
-    def visualize_numeric(df, visualize=True, save_png=False):
-        SmartEDA(df=df, visualize_numeric=visualize, save_png_numeric=save_png)
+    def visualize_numeric(df, visualize=True, save_png=False, dataset_name="dataset", copy_data=True):
+        SmartEDA(df=df, visualize_numeric=visualize, save_png_numeric=save_png, dataset_name=dataset_name, copy_data=copy_data)
+
+    def create_numeric(self):
+        self._create_numeric_vis()
 
     def _create_numeric_vis(self):
         self.numeric_cols = self.df.select_dtypes(include=np.number).columns.tolist()
@@ -137,13 +153,11 @@ class SmartEDA:
                 plt.show()
             else:
                 plt.close()
-    
-    def create_numeric(self):
-        self._create_numeric_vis()
+
 
     @staticmethod
-    def visualize_object(df, visualize=True, save_png=False):
-        SmartEDA(df=df, visualize_object=visualize, save_png_object=save_png)
+    def visualize_object(df, visualize=True, save_png=False, dataset_name="dataset", copy_data=True):
+        SmartEDA(df=df, visualize_object=visualize, save_png_object=save_png, dataset_name=dataset_name, copy_data=copy_data)
         
     def create_object(self):
         self._create_object_vis()
@@ -164,6 +178,10 @@ class SmartEDA:
             else:
                 plt.close()
     
+    @staticmethod
+    def visualize_heatmap(df, visualize=True, save_png=False, dataset_name="dataset", copy_data=True):
+        SmartEDA(df=df, visualize_heatmap=visualize, save_png_heatmap=save_png, dataset_name=dataset_name, copy_data=copy_data)
+
     def create_heatmap(self):
         self._create_heatmap_vis()
 
@@ -176,7 +194,3 @@ class SmartEDA:
             plt.savefig(os.path.join(self.heatmap_dir, "heatmap.png"))
         plt.show()
     
-    @staticmethod
-    def visualize_heatmap(df, visualize=True, save_png=False,):
-        SmartEDA(df=df, visualize_heatmap=visualize, save_png_heatmap=save_png)
-
