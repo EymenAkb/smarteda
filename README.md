@@ -1,6 +1,6 @@
 # SmartEDA
 
-This repository was developed by **Eymen Akbulut** as part of automating EDA codes.
+This repository was developed by **EymenAkb** as part of automating EDA codes.
 
 ## Description
 
