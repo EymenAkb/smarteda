@@ -101,7 +101,7 @@ class SmartEDA:
         if self.visobj or self.save_png_obj:
             self.create_object()
             
-        if self.vishm or self.save_png_hm:
+        if self.visualize_heatmap or self.save_png_hm:
             self.create_heatmap()
     
 
