@@ -52,7 +52,7 @@ class SmartEDA:
         self.df = df
         self.visnum = visualize_numeric
         self.visobj = visualize_object
-        self.vishm = visualize_heatmap
+        self.visualize_heatmap = visualize_heatmap
         self.save_png_obj = save_png_object
         self.save_png_num = save_png_numeric
         self.save_png_hm = save_png_heatmap
