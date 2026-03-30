@@ -35,7 +35,6 @@ class SmartEDA:
 
     def __init__(self,
         df: pd.DataFrame = None,
-        copy_data: bool = True,
         visualize_numeric: bool = False,
         visualize_object: bool = False,
         visualize_heatmap: bool = False,
@@ -45,9 +44,10 @@ class SmartEDA:
         show_info: bool = False,
         dataset_name: str = "dataset"):
         
-        # - - - Using modern plot style - - - #
-        plt.style.use('seaborn-v0_8') 
-    
+        try:
+            plt.style.use('seaborn-v0_8')
+        except:
+            plt.style.use('seaborn')
 
         self.df = df
         self.visnum = visualize_numeric
@@ -57,7 +57,6 @@ class SmartEDA:
         self.save_png_num = save_png_numeric
         self.save_png_hm = save_png_heatmap
         self.show_info = show_info
-        self.copy_data = copy_data
 
         self.dataset_name = dataset_name
         self.output_dir = os.path.join("eda_outputs", self.dataset_name)
@@ -78,21 +77,24 @@ class SmartEDA:
                 if df.empty:
                     raise ValueError("Data Frame must not be empty")
                 else:
-                    self.df = df.copy(deep=True) if self.copy_data else self.df
+                    self.df = df
                     self.numeric_cols = self.df.select_dtypes(include=np.number).columns.tolist()
                     self.object_cols = self.df.select_dtypes(include=["object", "category", "str"]).columns.tolist()
                     self.render_plots()
             else:
                 raise TypeError("DataFrame is not a Pandas DataFrame")
         except Exception as e:
-            print(f"Error: {e}")
             raise e
-        
-        self.df = self.df.copy(deep=True) if self.copy_data else self.df
+
+
+    @staticmethod
+    def save_png_all(df, show_df_info=True,save_numeric=True, save_object=True, save_heatmap=True):
+        SmartEDA(df=df, save_png_numeric=save_numeric, save_png_object=save_object, save_png_heatmap=save_heatmap, show_info=show_df_info)
 
     def render_plots(self):
-        if self.show_df_info:
+        if self.show_info:
             self.info_show()
+        
         if self.visnum or self.save_png_num:
             self.create_numeric()
 
@@ -102,16 +104,18 @@ class SmartEDA:
         if self.vishm or self.save_png_hm:
             self.create_heatmap()
     
+
     @staticmethod
     def show_df_info(df):
         SmartEDA(df=df)._create_df_info_report()
 
     def info_show(self):
-        self._create_df_info_report
+        self._create_df_info_report()
     
     def _create_df_info_report(self):
         print("\n=== DataFrame Info ===")
         self.df.info()
+        #self.df.describe()
     
         print("\n=== Missing Values per Column ===")
         print(self.df.isnull().sum())
@@ -120,9 +124,10 @@ class SmartEDA:
         print(f'Numeric columns: {", ".join(self.numeric_cols)}')
         print(f'Object columns: {", ".join(self.object_cols)}')
 
+
     @staticmethod
-    def visualize_numeric(df, visualize=True, save_png=False, dataset_name="dataset", copy_data=True):
-        SmartEDA(df=df, visualize_numeric=visualize, save_png_numeric=save_png, dataset_name=dataset_name, copy_data=copy_data)
+    def report_numeric(df, visualize=True, save_png=True, dataset_name="dataset"):
+        SmartEDA(df=df, visualize_numeric=visualize, save_png_numeric=save_png, dataset_name=dataset_name)
 
     def create_numeric(self):
         self._create_numeric_vis()
@@ -156,9 +161,9 @@ class SmartEDA:
 
 
     @staticmethod
-    def visualize_object(df, visualize=True, save_png=False, dataset_name="dataset", copy_data=True):
-        SmartEDA(df=df, visualize_object=visualize, save_png_object=save_png, dataset_name=dataset_name, copy_data=copy_data)
-        
+    def report_object(df, visualize=True, save_png=True, dataset_name="dataset"):
+        SmartEDA(df=df, visualize_object=visualize, save_png_object=save_png, dataset_name=dataset_name)
+
     def create_object(self):
         self._create_object_vis()
 
@@ -178,9 +183,10 @@ class SmartEDA:
             else:
                 plt.close()
     
+
     @staticmethod
-    def visualize_heatmap(df, visualize=True, save_png=False, dataset_name="dataset", copy_data=True):
-        SmartEDA(df=df, visualize_heatmap=visualize, save_png_heatmap=save_png, dataset_name=dataset_name, copy_data=copy_data)
+    def report_heatmap(df, visualize=True, save_png=True, dataset_name="dataset"):
+        SmartEDA(df=df, visualize_heatmap=visualize, save_png_heatmap=save_png, dataset_name=dataset_name)
 
     def create_heatmap(self):
         self._create_heatmap_vis()
@@ -192,5 +198,8 @@ class SmartEDA:
         sns.heatmap(correlation, annot=True, cmap="coolwarm", fmt=".2f")
         if self.save_png_hm:
             plt.savefig(os.path.join(self.heatmap_dir, "heatmap.png"))
-        plt.show()
+        if self.visualize_heatmap:
+            plt.show()
+        else:
+            plt.close()
     

@@ -10,13 +10,16 @@ This program is mostly on visualizing and summarizing data.
 Some static methods are given below:
 
 - `show_df_info` : Used for giving information, missing values and categories of columns as numeric or object columns.
-- `visualize_numeric` : Used for saving png or directly visualizing numeric columns as histograms.
-- `visualize_object` : Used for saving png or directly visualizing object columns as bar plots.
-- `visualize_heatmap` : Showing correlation between numeric columns.
+- `report_numeric` : Visualizing numeric columns and saving histograms as png. (you can adjust saving or visualizing)
+- `report_object` : Visualizing object columns and saving bar plots as png. (you can adjust saving or visualizing)
+- `report_heatmap` : Visualizing and saving heatmap as png. (you can adjust saving or visualizing)
+- `save_png_all` : Saving png for numerical, categorical columns and also saving heatmap as correlation of numeric columns.
 
 #### Note
 *If you set `visualize=True` the library will iterate over each column.*
 *If you don't want to see each of them one by one then you can set `visualize=False` and `save_png=True`*
+*In standart way static reports will automatically save pngs and visualize the plots. Except `save_png_all`*
+*`save_png_all` method is adjustable for any column type you want.*
 
 ## Required libraries
 
@@ -40,7 +43,5 @@ docstring might be helpful throughout these processes.
 
 ## Note
 
-Honestly i want to write something warm in between a serious description.
-I hope this is useful library for your needings. 
 *This library doesn't summarize the code as pdf only for intuition.*
 *This is only a prototype so it can only work for numeric and categorical features.*
